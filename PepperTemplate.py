@@ -26,40 +26,29 @@ class PepperTemplate(object):
         self.tts = session.service("ALTextToSpeech")
         self.animation = session.service("ALAnimationPlayer")
         self.ALDialog = session.service("ALDialog")
-        self.animatedSay = ALProxy("ALAnimatedSpeech", "127.0.0.1", 9559)
-        self.photoCapture = ALProxy("ALPhotoCapture", "127.0.0.1", 9559)
+        self.animatedSay = session.service("ALAnimatedSpeech")
 
-        self.photoCapture.setResolution(0)
+        self.ALFaceDetectionProxy = session.service("ALFaceDetection")
 
-        self.ALFaceDetectionProxy = ALProxy(
-            "ALFaceDetection", "127.0.0.1", 9559)
-
-        #self.ALFaceDetectionProxy = session.service("ALFaceDetectionProxy")
-
-        self.postureProxy = ALProxy("ALRobotPosture", '127.0.0.1', 9559)
-        #self.animatedSay = session.service("ALAnimatedSpeechProxy")
+        self.postureProxy = session.service("ALRobotPosture")
         self.behavior = session.service("ALBehaviorManager")
 
         # Subscriber
         self.p_doAction_subscriber = self.memory.subscriber("P_DOACTION")
-        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(
-            self.p_doAction)
+        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(self.p_doAction)
 
-        self.p_headTouched_subscriber = self.memory.subscriber(
-            "FrontTactilTouched")
-        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(
-            self.p_headTouched)
-
-        # self.subscriber = self.memory.subscriber("FaceDetected")
-        # self.subscriber.signal.connect(self.p_faceDetected)
-
-        # Get the services ALTextToSpeech and ALFaceDetection.
-        # self.ALFaceDetectionProxy.subscribe("PepperTemplate")
+        self.p_headTouched_subscriber = self.memory.subscriber("FrontTactilTouched")
+        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(self.p_headTouched)
 
         self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
-        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
-            self.p_faceDetected)
+        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
 
+        self.p_getSavedFaces_subscriber = self.memory.subscriber("P_GETSAVEDFACES")
+        self.p_getSavedFaces_subscriber_signal = self.p_getSavedFaces_subscriber.signal.connect(self.p_getSavedFaces)
+
+        self.enableRecognition = False
+
+<<<<<<< Updated upstream
         self.p_toggleFaceDetection_subscriber = self.memory.subscriber(
             "ToggleFaceDetection")
         self.p_toggleFaceDetection_subscriber_signal = self.p_toggleFaceDetection_subscriber.signal.connect(
@@ -69,26 +58,26 @@ class PepperTemplate(object):
 
         # self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
         # self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
+=======
+        self.p_toggleFaceDetection_subscriber = self.memory.subscriber("ToggleFaceDetection")
+        self.p_toggleFaceDetection_subscriber_signal = self.p_toggleFaceDetection_subscriber.signal.connect(self.p_toggleFaceDetection)
+>>>>>>> Stashed changes
 
         self.postureProxy.goToPosture('StandInit', 0.5)
 
-        # The picture object
         # Get the service tablet
         self.tablet = session.service('ALTabletService')
         self.tablet.resetTablet()
         self.tablet.setBrightness(1)
-        self.session = session
 
         # BasicAwareness
-        # stop the moving
         self.life = session.service("ALAutonomousLife")
         self.life.setAutonomousAbilityEnabled("BasicAwareness", False)
         self.life.setAutonomousAbilityEnabled("AutonomousBlinking", True)
 
-        self.motionProxy = ALProxy("ALMotion", '127.0.0.1', 9559)
-        self.audioProxy = ALProxy("ALAudioPlayer", '127.0.0.1', 9559)
-        self.animation_player_service = ALProxy(
-            "ALAnimationPlayer", '127.0.0.1', 9559)
+        self.motionProxy = session.service("ALMotion")
+        # self.audioProxy = ALProxy("ALAudioPlayer", '127.0.0.1', 9559)
+        # self.animation_player_service = ALProxy("ALAnimationPlayer", '127.0.0.1', 9559)
         self.motionProxy.wakeUp()
         self.ALDialog.setLanguage("English")
 
@@ -97,71 +86,38 @@ class PepperTemplate(object):
         self.tts.setParameter("speed", 0.7)
         self.tts.setParameter("pitchShift", 1.2)
 
-        # # All Leds of Pepper
-        # self.leds = ALProxy("ALLeds","127.0.0.1",9559)
-        # EyeLeds = ["RightFaceLed1","RightFaceLed2","RightFaceLed3","RightFaceLed4","RightFaceLed5","RightFaceLed6","RightFaceLed7","RightFaceLed8",
-        #         "LeftFaceLed1","LeftFaceLed2","LeftFaceLed3","LeftFaceLed4","LeftFaceLed5","LeftFaceLed6","LeftFaceLed7","LeftFaceLed8"]
-        # EarLeds = ["LeftEarLeds", "RightEarLeds"]
-        # self.leds.createGroup("eyeLeds",EyeLeds)
-        # self.leds.createGroup("earLeds",EarLeds)
-        # self.leds.off("eyeLeds")
-        # self.leds.off("earLeds")
-        # self.leds.setIntensity("eyeLeds", 0)
-        # self.leds.setIntensity("earLeds", 0)
-        # self.leds.fadeRGB("eyeLeds", "green", 1)
-        # self.leds.fadeRGB("eyeLeds", "yellow", 1)
-
-        self.motions = [
-            "animations/Stand/Emotions/Positive/Hysterical_1",
-            "animations/Stand/Gestures/Enthusiastic_4",
-            "animations/Stand/Gestures/Enthusiastic_5",
-            "animations/Stand/Gestures/Excited_1",
-            "animations/Stand/Gestures/No_1",
-            "animations/Stand/Gestures/No_2",
-            "animations/Stand/Gestures/No_3",
-            "animations/Stand/Gestures/No_8",
-            "animations/Stand/Gestures/No_9",
-            "animations/Stand/Gestures/Nothing_2",
-            "animations/Stand/Gestures/ShowSky_1",
-            "animations/Stand/Gestures/ShowSky_11",
-            "animations/Stand/Gestures/ShowSky_2",
-            "animations/Stand/Gestures/ShowSky_4",
-            "animations/Stand/Gestures/ShowSky_5",
-            "animations/Stand/Gestures/ShowSky_6",
-            "animations/Stand/Gestures/ShowSky_7",
-            "animations/Stand/Gestures/ShowSky_8",
-            "animations/Stand/Gestures/ShowSky_9",
-            "animations/Stand/Gestures/Yes_1",
-            "animations/Stand/Gestures/Yes_2",
-            "animations/Stand/Gestures/Yes_3",
-            "animations/Stand/Gestures/YouKnowWhat_1",
-            "animations/Stand/Gestures/YouKnowWhat_2",
-            "animations/Stand/Gestures/YouKnowWhat_3",
-            "animations/Stand/Gestures/YouKnowWhat_5",
-            "animations/Stand/Gestures/YouKnowWhat_6",
-            "animations/Stand/Gestures/You_1",
-            "animations/Stand/Gestures/You_4",
-            "animations/Stand/Waiting/ShowSky_1",
-            "animations/Stand/Waiting/ShowSky_2",
-        ]
-
     def p_doAction(self, event):
-        self.p_doAction_subscriber.signal.disconnect(
-            self.p_doAction_subscriber_signal)
+        self.p_doAction_subscriber.signal.disconnect(self.p_doAction_subscriber_signal)
 
         print("learn face")
         self.ALFaceDetectionProxy.learnFace(event)
         # val = self.ALFaceDetectionProxy.getLearnedFacesList()
         # print(val);
 
-        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(
-            self.p_doAction)
+        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(self.p_doAction)
+
+    def p_getSavedFaces(self, event):
+        self.p_getSavedFaces_subscriber.signal.disconnect(self.p_getSavedFaces_subscriber_signal)
+
+        self.animatedSay.say("Get Saved faces")
+        val = self.ALFaceDetectionProxy.getLearnedFacesList()
+        print(val);
+
+        self.p_getSavedFaces_subscriber_signal = self.p_getSavedFaces_subscriber.signal.connect(self.p_getSavedFaces)
+
 
     def p_faceDetected(self, event):
         if self.enableRecognition is False:
             return
+<<<<<<< Updated upstream
         self.p_faceDetected_subscriber.signal.disconnect(
             self.p_faceDetected_subscriber_signal)
+=======
+
+        print('detecting face')
+
+        self.p_faceDetected_subscriber.signal.disconnect(self.p_faceDetected_subscriber_signal)
+>>>>>>> Stashed changes
 
         if len(event) >= 2:
             if len(event[1]) >= 2:
@@ -169,20 +125,21 @@ class PepperTemplate(object):
                     if(len(event[1][0][1]) >= 3):
                         print(event[1][0][1][2])
 
-        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
-            self.p_faceDetected)
+        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
+
+    def p_toggleFaceDetection(self, event):
+        print(self.enableRecognition)
+        self.enableRecognition = not self.enableRecognition
 
     def p_toggleFaceDetection(self, event):
         self.enableRecognition = not self.enableRecognition
 
     def p_headTouched(self, event):
-        self.p_headTouched_subscriber.signal.disconnect(
-            self.p_headTouched_subscriber_signal)
+        self.p_headTouched_subscriber.signal.disconnect(self.p_headTouched_subscriber_signal)
 
         self.animatedSay.say("Auwh! Why did you touch my head?")
 
-        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(
-            self.p_headTouched)
+        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(self.p_headTouched)
 
     def t_doAction(self):
         self.memory.raiseEvent("T_RECEIVEACTION", 'parameter')
@@ -200,20 +157,22 @@ class PepperTemplate(object):
         print(self.ALFaceDetectionProxy.isTrackingEnabled())
         print("recognition treshold")
         print(self.ALFaceDetectionProxy.getRecognitionConfidenceThreshold())
+<<<<<<< Updated upstream
         self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.6)
         self.ALFaceDetectionProxy.clearDatabase()
         # self.t_doAction()
+=======
+        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.2)
+
+        #self.ALFaceDetectionProxy.clearDatabase()
+        #self.p_getSavedFaces()
+>>>>>>> Stashed changes
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
             print ("Interrupted by user, stopping PepperTemplate")
             self.tablet.hideWebview()
-
-            # self.confirmPictureSubscriber.signal.disconnect(self.confirmPictureSubscriberSignal)
-            # self.headTouchedSubscriber.signal.disconnect(self.headTouchedSubscriberSignal)
-            # self.TakePictureSubscriber.signal.disconnect(self.TakePictureSubscriberSignal)
-            # stop
             sys.exit(0)
 
 
