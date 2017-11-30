@@ -33,6 +33,7 @@
 
 <body class="valign-wrapper">
   <div class="container">
+    <p id="log"></p>
     <div class="row">
       <a class="waves-effect waves-light btn btn-large control-button" onClick="doAction()">
         Do action
@@ -44,8 +45,23 @@
   </div>
   <script type="text/javascript">
 
-
     var session = new QiSession(location.host); //198.18.0.1
+
+
+    // Javascript error Handling
+    window.addEventListener("error", handleError, true);
+
+    function handleError(evt) {
+      if (evt.message) { // Chrome sometimes provides this
+        log("error: " + evt.message + " at linenumber: " + evt.lineno + " of file: " + evt.filename);
+      } else {
+        log("error: " + evt.type + " from element: " + (evt.srcElement || evt.target));
+      }
+    }
+
+    function log(info) {
+      $("#log").text(info);
+    }
 
     function doAction() {
       session.service("ALMemory").done(function(memory) {
