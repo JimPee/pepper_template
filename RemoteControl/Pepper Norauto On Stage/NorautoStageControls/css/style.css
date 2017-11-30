@@ -1,0 +1,10 @@
+a.control-button {
+  min-width: 200px;
+  margin: 0 0 50px 0;
+  background-color: #00377A !important;
+}
+
+a.wakeup-button {
+  min-width: 200px;
+  margin: 40px 0 70px 0;
+}

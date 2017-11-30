@@ -1,0 +1,12 @@
+.logo {
+  width: 890px;
+  display: block;
+  margin: 67px auto 0 auto;
+}
+
+html, body, .container {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  background-color: #00377A;
+}

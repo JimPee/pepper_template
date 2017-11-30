@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="initial-scale = 1.333,
+    minimum-scale = 1.333,
+    maximum-scale = 1.333" />
+  <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection" />
+
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/materialize.min.js"></script>
+
+
+  <!--  Debugging Chrome -->
+  <script src="http://192.168.30.183/libs/qimessaging/1.0/qimessaging.js"></script>
+  <!-- IP of the tablet of the robot : 198.18.0.1 -->
+
+  <title>Controls Norauto</title>
+</head>
+
+<body class="valign-wrapper">
+  <div class="container">
+    <div class="row">
+      <div class="col s12 center-align">
+        <h1>Controls Norauto Event</h1>
+      </div>
+    </div>
+    <div class="row"> 
+      <div class="col s12 center-align">
+        <a class="waves-effect waves-light btn btn-large wakeup-button" onClick="wakeUp()">
+          Wake Up
+        </a>
+      </div>
+    </div>
+    <div class="row"> 
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('happy')">
+          Laugh/Happy
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('affirmative')">
+          Affirmative
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('explain')">
+          Explain
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('thinking')">
+          Thinking
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('applause')">
+          Applause
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('suprised')">
+          Suprised
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('handright')">
+          Hand to right
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('handleft')">
+          Hand to left
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('call')">
+          Call/Whistle
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('yesNod')">
+          Yes/Nod
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('drink')">
+          Drink
+        </a>
+      </div>
+      <div class="col s3 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="sendEmotion('guitar')">
+          Guitar
+        </a>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var session = new QiSession(location.host); //198.18.0.1
+    
+    function sendEmotion(emotionType) {
+      session.service("ALMemory").done(function(memory) {
+        memory.raiseEvent("P_EMOTION", emotionType);
+      }).fail(function(error) {
+        alert("An error occurred:", error);
+      });
+    }
+    
+    function wakeUp() {
+      session.service("ALMemory").done(function(memory) {
+        memory.raiseEvent("P_WAKEUP", 1);
+      }).fail(function(error) {
+        alert("An error occurred:", error);
+      });
+    }
+
+  </script>
+</body>
+
+</html>
