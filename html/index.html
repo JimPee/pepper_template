@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="initial-scale = 1.333,
+    minimum-scale = 1.333,
+    maximum-scale = 1.333" />
+  <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection" />
+
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/materialize.min.js"></script>
+
+  <script type='application/javascript' src='js/fastclick.js'></script>
+  <script>
+    $(function() {
+      FastClick.attach(document.body);
+    });
+  </script>
+
+
+
+  <!--  Debugging Chrome -->
+  <!-- 192.168.30.183  -->
+  <script src="http://198.18.0.1/libs/qimessaging/1.0/qimessaging.js"></script>
+  <!-- IP of the tablet of the robot : 198.18.0.1 -->
+
+  <title>Pepper Template</title>
+</head>
+
+<body class="valign-wrapper">
+  <div class="container">
+    <div class="row">
+      <a class="waves-effect waves-light btn btn-large control-button" onClick="doAction()">
+        Do action
+      </a>
+    </div>
+    <div class="row">
+      <h1 id="actionReceived"></h1>
+    </div>
+  </div>
+  <script type="text/javascript">
+
+
+    var session = new QiSession(location.host); //198.18.0.1
+
+    function doAction() {
+      session.service("ALMemory").done(function(memory) {
+        memory.raiseEvent("P_DOACTION", "you touched the button");
+      }).fail(function(error) {
+        alert("An error occurred:", error);
+      });
+    }
+
+    session.service("ALMemory").then(function(ALMemory) {
+      ALMemory.subscriber("T_RECEIVEACTION").then(function(subscriber) {
+        subscriber.signal.connect(function(parameter) {
+          $('#actionReceived').text('Action received. Param:' + parameter);
+        });
+      });
+    });
+
+
+  </script>
+</body>
+
+</html>
