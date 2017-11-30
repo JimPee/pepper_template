@@ -11,6 +11,7 @@ from naoqi import ALProxy
 import threading
 from random import randint
 
+
 class PepperTemplate(object):
 
     def __init__(self, app):
@@ -25,17 +26,42 @@ class PepperTemplate(object):
         self.tts = session.service("ALTextToSpeech")
         self.animation = session.service("ALAnimationPlayer")
         self.ALDialog = session.service("ALDialog")
-        self.animatedSay = ALProxy("ALAnimatedSpeech","127.0.0.1",9559)
+        self.animatedSay = ALProxy("ALAnimatedSpeech", "127.0.0.1", 9559)
+        self.photoCapture = ALProxy("ALPhotoCapture", "127.0.0.1", 9559)
+
+        self.photoCapture.setResolution(0)
+
+        self.ALFaceDetectionProxy = ALProxy(
+            "ALFaceDetection", "127.0.0.1", 9559)
+
+        #self.ALFaceDetectionProxy = session.service("ALFaceDetectionProxy")
+
         self.postureProxy = ALProxy("ALRobotPosture", '127.0.0.1', 9559)
         #self.animatedSay = session.service("ALAnimatedSpeechProxy")
         self.behavior = session.service("ALBehaviorManager")
 
         # Subscriber
         self.p_doAction_subscriber = self.memory.subscriber("P_DOACTION")
-        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(self.p_doAction)
+        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(
+            self.p_doAction)
 
-        self.p_headTouched_subscriber = self.memory.subscriber("FrontTactilTouched")
-        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(self.p_headTouched)
+        self.p_headTouched_subscriber = self.memory.subscriber(
+            "FrontTactilTouched")
+        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(
+            self.p_headTouched)
+
+        # self.subscriber = self.memory.subscriber("FaceDetected")
+        # self.subscriber.signal.connect(self.p_faceDetected)
+
+        # Get the services ALTextToSpeech and ALFaceDetection.
+        # self.ALFaceDetectionProxy.subscribe("PepperTemplate")
+
+        self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
+        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
+            self.p_faceDetected)
+
+        # self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
+        # self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
 
         self.postureProxy.goToPosture('StandInit', 0.5)
 
@@ -51,9 +77,11 @@ class PepperTemplate(object):
         self.life = session.service("ALAutonomousLife")
         self.life.setAutonomousAbilityEnabled("BasicAwareness", False)
         self.life.setAutonomousAbilityEnabled("AutonomousBlinking", True)
-        self.motionProxy  = ALProxy("ALMotion", '127.0.0.1', 9559)
+
+        self.motionProxy = ALProxy("ALMotion", '127.0.0.1', 9559)
         self.audioProxy = ALProxy("ALAudioPlayer", '127.0.0.1', 9559)
-        self.animation_player_service = ALProxy("ALAnimationPlayer",'127.0.0.1', 9559)
+        self.animation_player_service = ALProxy(
+            "ALAnimationPlayer", '127.0.0.1', 9559)
         self.motionProxy.wakeUp()
         self.ALDialog.setLanguage("English")
 
@@ -111,21 +139,38 @@ class PepperTemplate(object):
         ]
 
     def p_doAction(self, event):
-        self.p_doAction_subscriber.signal.disconnect(self.p_doAction_subscriber_signal)
+        self.p_doAction_subscriber.signal.disconnect(
+            self.p_doAction_subscriber_signal)
 
-        print("Do action")
+        print("learn face")
+        self.ALFaceDetectionProxy.learnFace("Lucio")
+        # val = self.ALFaceDetectionProxy.getLearnedFacesList()
+        # print(val);
 
-        self.animatedSay.say(event)
+        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(
+            self.p_doAction)
 
-        self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(self.p_doAction)
+    def p_faceDetected(self, event):
+        self.p_faceDetected_subscriber.signal.disconnect(
+            self.p_faceDetected_subscriber_signal)
+
+        if len(event) >= 2:
+            if len(event[1]) >= 2:
+                if len(event[1][0]) >= 2:
+                    if(len(event[1][0][1]) >= 3):
+                        print(event[1][0][1][2])
+
+        self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
+            self.p_faceDetected)
 
     def p_headTouched(self, event):
-        self.p_headTouched_subscriber.signal.disconnect(self.p_headTouched_subscriber_signal)
+        self.p_headTouched_subscriber.signal.disconnect(
+            self.p_headTouched_subscriber_signal)
 
         self.animatedSay.say("Auwh! Why did you touch my head?")
 
-        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(self.p_headTouched)
-
+        self.p_headTouched_subscriber_signal = self.p_headTouched_subscriber.signal.connect(
+            self.p_headTouched)
 
     def t_doAction(self):
         self.memory.raiseEvent("T_RECEIVEACTION", 'parameter')
@@ -139,7 +184,13 @@ class PepperTemplate(object):
         self.tablet.cleanWebview()
         self.tablet.loadApplication("PepperTemplate")
         self.tablet.showWebview()
-        self.t_doAction()
+        print(self.ALFaceDetectionProxy.isRecognitionEnabled())
+        print(self.ALFaceDetectionProxy.isTrackingEnabled())
+        print("recognition treshold")
+        print(self.ALFaceDetectionProxy.getRecognitionConfidenceThreshold())
+        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.4)
+        # self.ALFaceDetectionProxy.clearDatabase()
+        # self.t_doAction()
         try:
             while True:
                 time.sleep(1)
@@ -147,9 +198,9 @@ class PepperTemplate(object):
             print ("Interrupted by user, stopping PepperTemplate")
             self.tablet.hideWebview()
 
-            #self.confirmPictureSubscriber.signal.disconnect(self.confirmPictureSubscriberSignal)
-            #self.headTouchedSubscriber.signal.disconnect(self.headTouchedSubscriberSignal)
-            #self.TakePictureSubscriber.signal.disconnect(self.TakePictureSubscriberSignal)
+            # self.confirmPictureSubscriber.signal.disconnect(self.confirmPictureSubscriberSignal)
+            # self.headTouchedSubscriber.signal.disconnect(self.headTouchedSubscriberSignal)
+            # self.TakePictureSubscriber.signal.disconnect(self.TakePictureSubscriberSignal)
             # stop
             sys.exit(0)
 
@@ -167,7 +218,7 @@ if __name__ == "__main__":
         connection_url = "tcp://" + args.ip + ":" + str(args.port)
         app = qi.Application(["PepperTemplate", "--qi-url=" + connection_url])
     except RuntimeError:
-        print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
+        print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) + ".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)
 
