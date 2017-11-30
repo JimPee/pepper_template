@@ -60,6 +60,13 @@ class PepperTemplate(object):
         self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
             self.p_faceDetected)
 
+        self.p_toggleFaceDetection_subscriber = self.memory.subscriber(
+            "ToggleFaceDetection")
+        self.p_toggleFaceDetection_subscriber_signal = self.p_toggleFaceDetection_subscriber.signal.connect(
+            self.p_toggleFaceDetection)
+
+        self.enableRecognition = False
+
         # self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
         # self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
 
@@ -143,7 +150,7 @@ class PepperTemplate(object):
             self.p_doAction_subscriber_signal)
 
         print("learn face")
-        self.ALFaceDetectionProxy.learnFace("Lucio")
+        self.ALFaceDetectionProxy.learnFace(event)
         # val = self.ALFaceDetectionProxy.getLearnedFacesList()
         # print(val);
 
@@ -151,6 +158,8 @@ class PepperTemplate(object):
             self.p_doAction)
 
     def p_faceDetected(self, event):
+        if self.enableRecognition is False:
+            return
         self.p_faceDetected_subscriber.signal.disconnect(
             self.p_faceDetected_subscriber_signal)
 
@@ -162,6 +171,9 @@ class PepperTemplate(object):
 
         self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(
             self.p_faceDetected)
+
+    def p_toggleFaceDetection(self, event):
+        self.enableRecognition = not self.enableRecognition
 
     def p_headTouched(self, event):
         self.p_headTouched_subscriber.signal.disconnect(
@@ -188,8 +200,8 @@ class PepperTemplate(object):
         print(self.ALFaceDetectionProxy.isTrackingEnabled())
         print("recognition treshold")
         print(self.ALFaceDetectionProxy.getRecognitionConfidenceThreshold())
-        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.4)
-        # self.ALFaceDetectionProxy.clearDatabase()
+        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.6)
+        self.ALFaceDetectionProxy.clearDatabase()
         # self.t_doAction()
         try:
             while True:

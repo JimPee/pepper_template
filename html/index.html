@@ -16,7 +16,7 @@
 
   <script type='application/javascript' src='js/fastclick.js'></script>
   <script>
-    $(function() {
+    $(function () {
       FastClick.attach(document.body);
     });
   </script>
@@ -25,7 +25,7 @@
 
   <!--  Debugging Chrome -->
   <!-- 192.168.30.183  -->
-  <script src="http://198.18.0.1/libs/qimessaging/1.0/qimessaging.js"></script>
+  <script src="/libs/qimessaging/1.0/qimessaging.js"></script>
   <!-- IP of the tablet of the robot : 198.18.0.1 -->
 
   <title>Pepper Template</title>
@@ -35,8 +35,20 @@
   <div class="container">
     <p id="log"></p>
     <div class="row">
-      <a class="waves-effect waves-light btn btn-large control-button" onClick="doAction()">
+      <div class="input-field col s12 center-align">
+        <!-- icon font-awesome -->
+        <input id="nameInput" type="text" class="validate">
+        <label>Name</label>
+      </div>
+    </div>
+    <div class="row">
+      <a class="waves-effect waves-light btn btn-large control-button center-align" onClick="doAction()">
         Do action
+      </a>
+    </div>
+    <div class="row">
+      <a class="waves-effect waves-light btn btn-large control-button center-align" onClick="toggleRecognition()">
+        toggleRecognition
       </a>
     </div>
     <div class="row">
@@ -63,17 +75,28 @@
       $("#log").text(info);
     }
 
-    function doAction() {
-      session.service("ALMemory").done(function(memory) {
-        memory.raiseEvent("P_DOACTION", "you touched the button");
-      }).fail(function(error) {
+    function doAction(naam) {
+      var inputValue = $("#nameInput").val()
+      session.service("ALMemory").done(function (memory) {
+        memory.raiseEvent("P_DOACTION", inputValue);
+      }).fail(function (error) {
         alert("An error occurred:", error);
       });
     }
 
-    session.service("ALMemory").then(function(ALMemory) {
-      ALMemory.subscriber("T_RECEIVEACTION").then(function(subscriber) {
-        subscriber.signal.connect(function(parameter) {
+    function toggleRecognition() {
+      session.service("ALMemory").done(function (memory) {
+        memory.raiseEvent("ToggleFaceDetection", "");
+      }).fail(function (error) {
+        alert("An error occurred:", error);
+      });
+    }
+
+
+
+    session.service("ALMemory").then(function (ALMemory) {
+      ALMemory.subscriber("T_RECEIVEACTION").then(function (subscriber) {
+        subscriber.signal.connect(function (parameter) {
           $('#actionReceived').text('Action received. Param:' + parameter);
         });
       });
