@@ -42,14 +42,26 @@
       </div>
     </div>
     <div class="row">
-      <a class="waves-effect waves-light btn btn-large control-button center-align" onClick="doAction()">
-        Do action
-      </a>
+      <div class="col s12 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="doAction()">
+          Learn Face
+        </a>
+      </div>
     </div>
     <div class="row">
-      <a class="waves-effect waves-light btn btn-large control-button center-align" onClick="toggleRecognition()">
-        toggleRecognition
-      </a>
+      <div class="col s12 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="toggleRecognition()">
+          toggle Recognition
+        </a>
+        <p id="currentRecognition"></p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 center-align">
+        <a class="waves-effect waves-light btn btn-large control-button" onClick="getSavedFaces()">
+          get saved faces
+        </a>
+      </div>
     </div>
     <div class="row">
       <h1 id="actionReceived"></h1>
@@ -58,6 +70,9 @@
   <script type="text/javascript">
 
     var session = new QiSession(location.host); //198.18.0.1
+
+    var currentRecognition = false;
+    $("#currentRecognition").text("Current Recognition: " + currentRecognition)
 
 
     // Javascript error Handling
@@ -84,7 +99,17 @@
       });
     }
 
+    function getSavedFaces() {
+      session.service("ALMemory").done(function (memory) {
+        memory.raiseEvent("P_GETSAVEDFACES", "");
+      }).fail(function (error) {
+        alert("An error occurred:", error);
+      });
+    }
+
     function toggleRecognition() {
+      currentRecognition = !currentRecognition;
+      $("#currentRecognition").text("Current Recognition: " + currentRecognition)
       session.service("ALMemory").done(function (memory) {
         memory.raiseEvent("ToggleFaceDetection", "");
       }).fail(function (error) {

@@ -48,20 +48,8 @@ class PepperTemplate(object):
 
         self.enableRecognition = False
 
-<<<<<<< Updated upstream
-        self.p_toggleFaceDetection_subscriber = self.memory.subscriber(
-            "ToggleFaceDetection")
-        self.p_toggleFaceDetection_subscriber_signal = self.p_toggleFaceDetection_subscriber.signal.connect(
-            self.p_toggleFaceDetection)
-
-        self.enableRecognition = False
-
-        # self.p_faceDetected_subscriber = self.memory.subscriber("FaceDetected")
-        # self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
-=======
         self.p_toggleFaceDetection_subscriber = self.memory.subscriber("ToggleFaceDetection")
         self.p_toggleFaceDetection_subscriber_signal = self.p_toggleFaceDetection_subscriber.signal.connect(self.p_toggleFaceDetection)
->>>>>>> Stashed changes
 
         self.postureProxy.goToPosture('StandInit', 0.5)
 
@@ -72,7 +60,7 @@ class PepperTemplate(object):
 
         # BasicAwareness
         self.life = session.service("ALAutonomousLife")
-        self.life.setAutonomousAbilityEnabled("BasicAwareness", False)
+        self.life.setAutonomousAbilityEnabled("BasicAwareness", True)
         self.life.setAutonomousAbilityEnabled("AutonomousBlinking", True)
 
         self.motionProxy = session.service("ALMotion")
@@ -86,13 +74,15 @@ class PepperTemplate(object):
         self.tts.setParameter("speed", 0.7)
         self.tts.setParameter("pitchShift", 1.2)
 
+
     def p_doAction(self, event):
         self.p_doAction_subscriber.signal.disconnect(self.p_doAction_subscriber_signal)
 
-        print("learn face")
-        self.ALFaceDetectionProxy.learnFace(event)
-        # val = self.ALFaceDetectionProxy.getLearnedFacesList()
-        # print(val);
+        if self.ALFaceDetectionProxy.learnFace(event):
+            self.animatedSay.say("Face Learned!")
+        else:
+            self.animatedSay.say("Learning failed!")
+
 
         self.p_doAction_subscriber_signal = self.p_doAction_subscriber.signal.connect(self.p_doAction)
 
@@ -109,29 +99,22 @@ class PepperTemplate(object):
     def p_faceDetected(self, event):
         if self.enableRecognition is False:
             return
-<<<<<<< Updated upstream
-        self.p_faceDetected_subscriber.signal.disconnect(
-            self.p_faceDetected_subscriber_signal)
-=======
-
-        print('detecting face')
 
         self.p_faceDetected_subscriber.signal.disconnect(self.p_faceDetected_subscriber_signal)
->>>>>>> Stashed changes
 
         if len(event) >= 2:
             if len(event[1]) >= 2:
                 if len(event[1][0]) >= 2:
                     if(len(event[1][0][1]) >= 3):
-                        print(event[1][0][1][2])
+                        name = event[1][0][1][2]
+                        print(name)
+                        self.animatedSay.say("Hi " + name + " !")
+
 
         self.p_faceDetected_subscriber_signal = self.p_faceDetected_subscriber.signal.connect(self.p_faceDetected)
 
     def p_toggleFaceDetection(self, event):
         print(self.enableRecognition)
-        self.enableRecognition = not self.enableRecognition
-
-    def p_toggleFaceDetection(self, event):
         self.enableRecognition = not self.enableRecognition
 
     def p_headTouched(self, event):
@@ -157,16 +140,10 @@ class PepperTemplate(object):
         print(self.ALFaceDetectionProxy.isTrackingEnabled())
         print("recognition treshold")
         print(self.ALFaceDetectionProxy.getRecognitionConfidenceThreshold())
-<<<<<<< Updated upstream
-        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.6)
-        self.ALFaceDetectionProxy.clearDatabase()
-        # self.t_doAction()
-=======
-        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.2)
+        self.ALFaceDetectionProxy.setRecognitionConfidenceThreshold(0.4)
 
         #self.ALFaceDetectionProxy.clearDatabase()
         #self.p_getSavedFaces()
->>>>>>> Stashed changes
         try:
             while True:
                 time.sleep(1)
